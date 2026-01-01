@@ -1,0 +1,13 @@
+package io.github.houcai.gift_shop_backend;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class GiftShopBackendApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(GiftShopBackendApplication.class, args);
+	}
+
+}
