@@ -3,6 +3,7 @@ package io.github.houcai.gift_shop_backend.model;
 import io.github.houcai.gift_shop_backend.dto.ProductRequest;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.UUID;
 public class Product {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID) // hibernate generated UUID
     private UUID id;
 
     private String name;

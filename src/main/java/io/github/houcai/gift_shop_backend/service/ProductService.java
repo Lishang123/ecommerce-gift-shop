@@ -2,7 +2,7 @@ package io.github.houcai.gift_shop_backend.service;
 
 import io.github.houcai.gift_shop_backend.dto.ProductRequest;
 import io.github.houcai.gift_shop_backend.dto.ProductResponse;
-import io.github.houcai.gift_shop_backend.mapper.ProductMapper;
+import io.github.houcai.gift_shop_backend.mapper.ResponseMapper;
 import io.github.houcai.gift_shop_backend.model.Product;
 import io.github.houcai.gift_shop_backend.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,19 +31,19 @@ public class ProductService {
         //productList.add(product);
         Product savedProduct = productRepository.save(product);
         // no need to create mapper instance for static method!
-        return ProductMapper.toResponse(savedProduct);
+        return ResponseMapper.toResponse(savedProduct);
     }
 
 
     public List<ProductResponse> getAllProducts() {
-        return productRepository.findAll().stream().map(ProductMapper::toResponse).collect(Collectors.toList());
+        return productRepository.findAll().stream().map(ResponseMapper::toResponse).collect(Collectors.toList());
     }
 
     public Optional<ProductResponse> updateProduct(UUID id, ProductRequest productRequest) {
         return productRepository.findById(id).map(
                 existingProduct -> {
                     existingProduct.updateFrom(productRequest);
-                    return ProductMapper.toResponse(productRepository.save(existingProduct));
+                    return ResponseMapper.toResponse(productRepository.save(existingProduct));
                 }
         );
     }
