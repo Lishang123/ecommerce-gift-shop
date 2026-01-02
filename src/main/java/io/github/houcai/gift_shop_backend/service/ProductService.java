@@ -48,6 +48,25 @@ public class ProductService {
         );
     }
 
+    public boolean deleteProduct(UUID id){
+        return productRepository.findById(id).map(
+                product -> {
+                    productRepository.deleteById(id);
+                    return true;
+                }
+        ).orElse(false);
+    }
+
+    public boolean setActive(UUID id, boolean active){
+        return productRepository.findById(id).map(
+                product -> {
+                    product.setActive(active);
+                    productRepository.save(product);
+                    return true;
+                }
+        ).orElse(false);
+    }
+
 //    public Optional<Product> getProductById(UUID id) {
 //        return productList.stream()
 //                .filter(product -> product.getId().equals(id)).findFirst();

@@ -6,6 +6,7 @@ import io.github.houcai.gift_shop_backend.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,5 +39,25 @@ public class ProductController {
                 () -> ResponseEntity.notFound().build()
         );
     }
+
+    @PostMapping("/deactivate/{id}")
+    public ResponseEntity<ProductResponse> deactivateProduct(@PathVariable UUID id){
+        boolean found = productService.setActive(id, false);
+        return found ? ResponseEntity.noContent().build(): ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/activate/{id}")
+    public ResponseEntity<ProductResponse> activateProduct(@PathVariable UUID id){
+        boolean found = productService.setActive(id, true);
+        return found ? ResponseEntity.noContent().build(): ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ProductResponse> deleteProduct(@PathVariable UUID id){
+        boolean deleted = productService.deleteProduct(id);
+        return deleted ? ResponseEntity.noContent().build(): ResponseEntity.notFound().build();
+    }
+
+
 
 }
