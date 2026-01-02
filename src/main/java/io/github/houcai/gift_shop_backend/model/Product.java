@@ -1,15 +1,24 @@
 package io.github.houcai.gift_shop_backend.model;
 
 import io.github.houcai.gift_shop_backend.dto.ProductRequest;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
+@Entity(name="products")
+@NoArgsConstructor
 public class Product {
 
-    private final UUID id = UUID.randomUUID();
+    @Id
+    @GeneratedValue
+    private UUID id;
+
     private String name;
     private String description;
     private BigDecimal price;

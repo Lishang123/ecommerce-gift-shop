@@ -1,3 +1,13 @@
 spring:
   application:
     name: gift-shop-backend
+  datasource:
+    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
+    username: postgres
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
