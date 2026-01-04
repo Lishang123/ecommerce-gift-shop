@@ -8,39 +8,29 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
-@Entity(name="cart")
+@Entity(name="orders")
 @Data
 @NoArgsConstructor
-public class CartItem {
-
-    public CartItem(User user, Product product, Integer quantity, BigDecimal price) {
-        this.user = user;
-        this.product = product;
-        this.quantity = quantity;
-        this.price = price;
-    }
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false) // user cannot be null.
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name="product_id", nullable = false) // product cannot be null.
-    private Product product;
+    private BigDecimal totalAmount;
 
-    private Integer quantity;
+    private OrderStatus status = OrderStatus.PENDING;
 
-    /**
-     * The subtotal price of a cart item.
-     */
-    private BigDecimal price;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

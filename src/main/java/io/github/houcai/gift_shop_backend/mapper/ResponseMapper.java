@@ -1,12 +1,11 @@
 package io.github.houcai.gift_shop_backend.mapper;
 
-import io.github.houcai.gift_shop_backend.dto.AddressDTO;
-import io.github.houcai.gift_shop_backend.dto.ProductResponse;
-import io.github.houcai.gift_shop_backend.dto.UserResponse;
-import io.github.houcai.gift_shop_backend.model.Address;
-import io.github.houcai.gift_shop_backend.model.Product;
-import io.github.houcai.gift_shop_backend.model.User;
+import io.github.houcai.gift_shop_backend.dto.*;
+import io.github.houcai.gift_shop_backend.model.*;
 import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor
 public final class ResponseMapper {
@@ -46,6 +45,31 @@ public final class ResponseMapper {
                 user.getPhone(),
                 user.getRole(),
                 toAddressDTO(user.getAddress())
+        );
+    }
+
+    public static OrderItemDTO toOrderItemDTO(OrderItem orderItem){
+        if (orderItem != null){
+            return new OrderItemDTO(
+                    orderItem.getId(),
+                    orderItem.getProduct().getId(),
+                    orderItem.getQuantity(),
+                    orderItem.getPrice(),
+                    orderItem.getPrice().multiply(BigDecimal.valueOf(orderItem.getQuantity()))
+            );
+        }
+        return null;
+    }
+
+    public static OrderResponse toResponse(Order order){
+        return new OrderResponse(
+                order.getId(),
+                order.getTotalAmount(),
+                order.getStatus(),
+                order.getItems().stream()
+                        .map(ResponseMapper::toOrderItemDTO)
+                        .collect(Collectors.toUnmodifiableList()),
+                order.getCreatedAt()
         );
     }
 
