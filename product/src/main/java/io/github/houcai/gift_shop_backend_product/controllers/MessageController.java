@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RefreshScope
+@RefreshScope //“This bean should be reloaded at runtime when configuration is refreshed.”
 public class MessageController {
 
     @Value("${app.message}")
