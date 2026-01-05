@@ -12,7 +12,7 @@ spring:
 
           # now the spring cloud bus version auto-refresh (using rabbitMQ)
           search-locations: file:/Users/houcai/Projects/carmel-gift-shop/carmel-gift-shop/config-server/src/main/resources/config
-  rabbitmq:
+  rabbitmq: # for spring cloud bus
     host: localhost
     port: 5672
     username: guest
