@@ -8,7 +8,17 @@ spring:
       server:
         native:
           # not work with Spring Cloud Bus + RabbitMQ because of JAR
-          search-locations: classpath:/config
+          # search-locations: classpath:/config
+
+          # now the spring cloud bus version auto-refresh (using rabbitMQ)
+          search-locations: file:/Users/houcai/Projects/carmel-gift-shop/carmel-gift-shop/config-server/src/main/resources/config
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
 
 server:
   port: 8888
