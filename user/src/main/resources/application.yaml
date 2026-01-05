@@ -1,16 +1,7 @@
 spring:
   application:
     name: user-service
-  datasource: # TODO: talk to another database
-    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
-    username: postgres
-    password: postgres
-  jpa:
-    database: POSTGRESQL
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-
-server:
-  port: 8081
+  config:
+    # use optional so that the startup won't fail just because the server is unreachable.
+    # don't use optional if configserver is the only option.
+    import: optional:configserver:http://localhost:8888

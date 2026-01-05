@@ -1,16 +1,7 @@
 spring:
   application:
     name: product-service
-  datasource:
-    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
-    username: postgres
-    password: postgres
-  jpa:
-    database: POSTGRESQL
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  config:
+    # http://localhost:8888/product-service/default
+    import: configserver:http://localhost:8888
 
-server:
-  port: 8082

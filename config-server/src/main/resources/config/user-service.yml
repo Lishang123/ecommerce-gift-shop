@@ -1,0 +1,14 @@
+spring:
+  datasource: # TODO: talk to another database
+    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
+    username: postgres # TODO: change to .env !
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8081

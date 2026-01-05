@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud: # Configures the behavior of the config server.
+    config:
+      server:
+        native:
+          # not work with Spring Cloud Bus + RabbitMQ because of JAR
+          search-locations: classpath:/config
+
+server:
+  port: 8888
