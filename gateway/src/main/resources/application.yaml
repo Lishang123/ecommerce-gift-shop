@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: gateway
+
+# 2026.1.6
+# This config no longer works for new artifact: spring-cloud-starter-gateway-server-webflux
+# I have to use RouteLocator instead!!
+
+# The old artifact: spring-cloud-starter-gateway still works with the following config.
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: user-service
+#          uri: http://localhost:8081
+#          predicates:
+#            - Path=/api/users/**
+#        - id: product-service
+#          uri: http://localhost:8082
+#          predicates:
+#            - Path=/api/products/**
+#        - id: order-service
+#          uri: http://localhost:8083
+#          predicates:
+#            - Path=/api/orders/**, /api/cart/**
+# ex: http://localhost:8080/api/users -> http://localhost:8082/api/users
+server:
+  port: 8080
+
+logging:
+  level:
+    root: info
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+
