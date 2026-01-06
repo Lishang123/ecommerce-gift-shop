@@ -12,17 +12,19 @@ public class GatewayConfig {
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder.routes()
                 .route("user-service",
-                        r -> r.path("/api/users/**")
-                                //.uri("lb://USER-SERVICE"))
-                                .uri("http://localhost:8081"))
+                        r -> r.path("/users/**")
+//                                .filters(f -> f.rewritePath("/users(?<segment>/?.*)",
+//                                        "/api/users${segment}"))
+                                .uri("lb://USER-SERVICE"))
+                                //.uri("http://localhost:8081"))
                 .route("product-service",
         r -> r.path("/api/products/**")
-                                //.uri("lb://PRODUCT-SERVICE"))
-                                .uri("http://localhost:8082"))
+                                .uri("lb://PRODUCT-SERVICE"))
+                                //.uri("http://localhost:8082"))
                 .route("order-service",
                         r -> r.path("/api/orders/**", "/api/orders/**")
-                                //.uri("lb://ORDER-SERVICE"))
-                                .uri("http://localhost:8083"))
+                                .uri("lb://ORDER-SERVICE"))
+                                //.uri("http://localhost:8083"))
                 .build();
     }
 }
