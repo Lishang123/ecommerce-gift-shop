@@ -11,15 +11,18 @@ public class GatewayConfig {
     @Bean
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
         return builder.routes()
-                .route("product-service",
-                        r -> r.path("/api/products/**")
-                                .uri("lb://PRODUCT-SERVICE"))
                 .route("user-service",
                         r -> r.path("/api/users/**")
-                                .uri("lb://USER-SERVICE"))
+                                //.uri("lb://USER-SERVICE"))
+                                .uri("http://localhost:8081"))
+                .route("product-service",
+        r -> r.path("/api/products/**")
+                                //.uri("lb://PRODUCT-SERVICE"))
+                                .uri("http://localhost:8082"))
                 .route("order-service",
                         r -> r.path("/api/orders/**", "/api/orders/**")
-                                .uri("lb://ORDER-SERVICE"))
+                                //.uri("lb://ORDER-SERVICE"))
+                                .uri("http://localhost:8083"))
                 .build();
     }
 }
