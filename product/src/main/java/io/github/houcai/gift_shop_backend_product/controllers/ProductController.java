@@ -57,6 +57,12 @@ public class ProductController {
         return deleted ? ResponseEntity.noContent().build(): ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductResponse> getProduct(@PathVariable UUID id){
+        return productService.getProduct(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
 
 
 }

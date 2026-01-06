@@ -1,6 +1,10 @@
 package io.github.houcai.gift_shop_backend_order.services;
 
+import io.github.houcai.gift_shop_backend_order.clients.ProductServiceClient;
+import io.github.houcai.gift_shop_backend_order.clients.UserServiceClient;
 import io.github.houcai.gift_shop_backend_order.dtos.CartItemRequest;
+import io.github.houcai.gift_shop_backend_order.dtos.ProductResponse;
+import io.github.houcai.gift_shop_backend_order.dtos.UserResponse;
 import io.github.houcai.gift_shop_backend_order.models.CartItem;
 import io.github.houcai.gift_shop_backend_order.repositories.CartItemRepository;
 import jakarta.transaction.Transactional;
@@ -16,35 +20,35 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CartService {
     private final CartItemRepository cartItemRepository;
+    private final ProductServiceClient productServiceClient;
+    private final UserServiceClient userServiceClient;
 
     public String addToCart(String userId, CartItemRequest request){
-//        // Look for product
-//        Optional<Product> productOpt = productRepository.findById(request.getProductId());
-//        if (productOpt.isEmpty())
-//            return "The product is not found.";
-//
-//        Product product = productOpt.get();
-//        if (!product.getActive())
-//            return "The product is not active.";
-//
-//        // Check for quantity
-//        if (product.getStockQuantity() < request.getQuantity())
-//            return "The product doesn't have the requested quantity.";
-//
-//        // Look for User
-//        Optional<User> userOpt = userRepository.findById(Long.valueOf(userId));
-//        if (userOpt.isEmpty())
-//            return "The user is not found";
-//
-//        // Look for the cart item for this user and product.
-//        User user = userOpt.get();
+        // Look for product
+        Optional<ProductResponse> productOpt = productServiceClient.fetchProductById(request.getProductId());
+        if (productOpt.isEmpty())
+            return "The product is not found.";
+
+        ProductResponse product = productOpt.get();
+        if (!product.getActive())
+            return "The product is not active.";
+
+        // Check for quantity
+        if (product.getStockQuantity() < request.getQuantity())
+            return "The product doesn't have the requested quantity.";
+
+        // Look for User
+        Optional<UserResponse> userOpt = userServiceClient.fetchUserById(Long.valueOf(userId));
+        if (userOpt.isEmpty())
+            return "The user is not found";
+
+        // Look for the cart item for this user and product.
         UUID productId = request.getProductId();
         // If there is already an item in the cart: Update the quantity.
         if (cartItemRepository.findByUserIdAndProductId(userId, productId).isPresent()){
             CartItem existingCartItem = cartItemRepository.findByUserIdAndProductId(userId, productId).get();
             existingCartItem.setQuantity(existingCartItem.getQuantity() + request.getQuantity());
-            existingCartItem.setPrice(BigDecimal.valueOf(1000));
-            //existingCartItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(existingCartItem.getQuantity())));
+            existingCartItem.setPrice(product.getPrice().multiply(BigDecimal.valueOf(existingCartItem.getQuantity())));
             cartItemRepository.save(existingCartItem);
         }
         else{

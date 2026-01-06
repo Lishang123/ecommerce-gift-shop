@@ -1,6 +1,8 @@
 package io.github.houcai.gift_shop_backend_order.services;
 
+import io.github.houcai.gift_shop_backend_order.clients.UserServiceClient;
 import io.github.houcai.gift_shop_backend_order.dtos.OrderResponse;
+import io.github.houcai.gift_shop_backend_order.dtos.UserResponse;
 import io.github.houcai.gift_shop_backend_order.mappers.ResponseMapper;
 import io.github.houcai.gift_shop_backend_order.models.CartItem;
 import io.github.houcai.gift_shop_backend_order.models.Order;
@@ -21,6 +23,7 @@ public class OrderService {
 
     private final CartService cartService;
     private final OrderRepository orderRepository;
+    private final UserServiceClient userServiceClient;
 
     @Transactional
     public Optional<OrderResponse> createOrder(String userId){
@@ -29,13 +32,13 @@ public class OrderService {
         if (cartItems.isEmpty()) {
             return Optional.empty();
         }
-        // Validate for user
 
-//        Optional<User> userOptional = userRepository.findById(Long.valueOf(userId));
-//        if (userOptional.isEmpty()) {
-//            return Optional.empty();
-//        }
-//        User user = userOptional.get();
+        // Validate for user
+        Optional<UserResponse> userOptional = userServiceClient.fetchUserById(Long.valueOf(userId));
+        if (userOptional.isEmpty()) {
+            return Optional.empty();
+        }
+        // User user = userOptional.get();
 
         //TODO: reduce the quantity of the product for each order item.
 

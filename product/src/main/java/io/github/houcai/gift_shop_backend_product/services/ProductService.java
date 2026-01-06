@@ -39,6 +39,10 @@ public class ProductService {
         return productRepository.findAll().stream().map(ResponseMapper::toResponse).collect(Collectors.toList());
     }
 
+    public Optional<ProductResponse> getProduct(UUID productId) {
+        return productRepository.findById(productId).map(ResponseMapper::toResponse);
+    }
+
     public Optional<ProductResponse> updateProduct(UUID id, ProductRequest productRequest) {
         return productRepository.findById(id).map(
                 existingProduct -> {
@@ -67,8 +71,5 @@ public class ProductService {
         ).orElse(false);
     }
 
-//    public Optional<Product> getProductById(UUID id) {
-//        return productList.stream()
-//                .filter(product -> product.getId().equals(id)).findFirst();
-//    }
+
 }
