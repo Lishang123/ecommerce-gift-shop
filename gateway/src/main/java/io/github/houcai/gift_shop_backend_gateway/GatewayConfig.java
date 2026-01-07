@@ -30,7 +30,7 @@ public class GatewayConfig {
                                 .uri("lb://PRODUCT-SERVICE"))
                                 //.uri("http://localhost:8082"))
                 .route("order-service",
-                        r -> r.path("/api/orders/**", "/api/orders/**")
+                        r -> r.path("/api/orders/**", "/api/cart/**")
                                 .filters(f -> f.circuitBreaker(config -> config
                                         .setName("giftshopBreaker")
                                         .setFallbackUri("forward:/fallback/order")))
