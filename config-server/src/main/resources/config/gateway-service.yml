@@ -18,6 +18,7 @@ management:
       show-details: always #TODO: when_authorized
   # Enable circuit breaker health indicators in Actuator.
   # doesn't work...
+  # only visible under actuator/circuitbreakers.
   health:
     circuitbreakers:
       enabled: true
@@ -37,7 +38,7 @@ resilience4j:
     configs:
       default:
         # Registers this circuit breaker in Spring Boot Actuator health.
-        # stll doesn't work
+        # stll doesn't work, only visible under actuator/circuitbreakers.
         registerHealthIndicator: true
     instances:
       giftshopBreaker:
