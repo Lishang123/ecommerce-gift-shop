@@ -6,6 +6,9 @@ import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+
+import java.time.Duration;
 
 @Configuration
 public class GatewayConfig {
@@ -17,21 +20,40 @@ public class GatewayConfig {
                         r -> r.path("/api/users/**")
                                 //.filters(f -> f.rewritePath("/users(?<segment>/?.*)",
                                 //        "/api/users${segment}"))
-                                .filters(f -> f.circuitBreaker(config -> config
+                                .filters(f ->
+                                        f.retry(config -> config
+                                                .setRetries(10)
+                                                .setMethods(HttpMethod.GET))
+                                        .circuitBreaker(config -> config
                                         .setName("giftshopBreaker")
                                         .setFallbackUri("forward:/fallback/users")))
                                 .uri("lb://USER-SERVICE")) //only possible with eureka.
                                 //.uri("http://localhost:8081"))
                 .route("product-service",
                         r -> r.path("/api/products/**")
-                                .filters(f -> f.circuitBreaker(config -> config
+                                .filters(f ->
+                                        f.retry(config -> config
+                                                .setRetries(10)
+                                                .setMethods(HttpMethod.GET)
+                                                .setBackoff(
+                                                        Duration.ofMillis(200),   // first delay
+                                                        Duration.ofSeconds(2),    // max delay
+                                                        2,                      // multiplier
+                                                        false                     // exponential? (false = fixed)
+                                                ))
+                                        .circuitBreaker(config -> config
                                         .setName("giftshopBreaker")
                                         .setFallbackUri("forward:/fallback/products")))
                                 .uri("lb://PRODUCT-SERVICE"))
                                 //.uri("http://localhost:8082"))
                 .route("order-service",
                         r -> r.path("/api/orders/**", "/api/cart/**")
-                                .filters(f -> f.circuitBreaker(config -> config
+                                .filters(f -> f
+                                        .retry(config -> config
+                                                .setRetries(5)
+                                                .setMethods(HttpMethod.GET)
+                                        )
+                                        .circuitBreaker(config -> config
                                         .setName("giftshopBreaker")
                                         .setFallbackUri("forward:/fallback/order")))
                                 .uri("lb://ORDER-SERVICE"))
