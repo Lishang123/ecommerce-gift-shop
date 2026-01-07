@@ -13,9 +13,9 @@ public class GatewayConfig {
         return builder.routes()
                 .route("user-service",
                         r -> r.path("/api/users/**")
-//                                .filters(f -> f.rewritePath("/users(?<segment>/?.*)",
-//                                        "/api/users${segment}"))
-                                .uri("lb://USER-SERVICE"))
+                                //.filters(f -> f.rewritePath("/users(?<segment>/?.*)",
+                                //        "/api/users${segment}"))
+                                .uri("lb://USER-SERVICE")) //only possible with eureka.
                                 //.uri("http://localhost:8081"))
                 .route("product-service",
         r -> r.path("/api/products/**")
