@@ -1,5 +1,62 @@
+server:
+  port: 8080
+
+logging:
+  level:
+    root: info
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # Always show detailed health information in the /actuator/health endpoint.
+  endpoint:
+    health:
+      show-details: always #TODO: when_authorized
+  # Enable circuit breaker health indicators in Actuator.
+  health:
+    circuitbreakers:
+      status:
+        enabled: true
+    resilience4j:
+      enabled: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+# Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # Registers this circuit breaker in Spring Boot Actuator health.
+        registerHealthIndicator: true
+    instances:
+      giftshopBreaker:
+        registerHealthIndicator: true
+        # Look at last 10 calls and calc the failure rate with them.
+        slidingWindowType: count_based # time_based
+        slidingWindowSize: 12
+        # Minimum calls required before evaluation starts
+        minimumNumberOfCalls: 6
+        # How many test calls are allowed when HALF-OPEN.
+        permittedNumberOfCallsInHalfOpenState: 3
+        # How long the circuit stays OPEN before trying recovery.
+        waitDurationInOpenState: 10s
+        # Failure percentage needed to OPEN the circuit
+        failureRateThreshold: 50
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+
 # 2026.1.6
-# This config no longer works for new artifact: spring-cloud-starter-gateway-server-webflux
+# This routing config no longer works for new artifact: spring-cloud-starter-gateway-server-webflux
 # I have to use RouteLocator instead!!
 
 # The old artifact: spring-cloud-starter-gateway still works with the following config.
@@ -20,26 +77,3 @@
 #          predicates:
 #            - Path=/api/orders/**, /api/cart/**
 # ex: http://localhost:8080/api/users -> http://localhost:8082/api/users
-server:
-  port: 8080
-
-logging:
-  level:
-    root: info
-    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
-    org.springframework.cloud.gateway: TRACE
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:7777/eureka
-    register-with-eureka: true
-    fetch-registry: true
-
-

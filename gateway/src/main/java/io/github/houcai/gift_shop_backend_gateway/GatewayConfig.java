@@ -1,5 +1,7 @@
 package io.github.houcai.gift_shop_backend_gateway;
 
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 import org.springframework.context.annotation.Bean;
@@ -15,14 +17,23 @@ public class GatewayConfig {
                         r -> r.path("/api/users/**")
                                 //.filters(f -> f.rewritePath("/users(?<segment>/?.*)",
                                 //        "/api/users${segment}"))
+                                .filters(f -> f.circuitBreaker(config -> config
+                                        .setName("giftshopBreaker")
+                                        .setFallbackUri("forward:/fallback/users")))
                                 .uri("lb://USER-SERVICE")) //only possible with eureka.
                                 //.uri("http://localhost:8081"))
                 .route("product-service",
                         r -> r.path("/api/products/**")
+                                .filters(f -> f.circuitBreaker(config -> config
+                                        .setName("giftshopBreaker")
+                                        .setFallbackUri("forward:/fallback/products")))
                                 .uri("lb://PRODUCT-SERVICE"))
                                 //.uri("http://localhost:8082"))
                 .route("order-service",
                         r -> r.path("/api/orders/**", "/api/orders/**")
+                                .filters(f -> f.circuitBreaker(config -> config
+                                        .setName("giftshopBreaker")
+                                        .setFallbackUri("forward:/fallback/order")))
                                 .uri("lb://ORDER-SERVICE"))
                                 //.uri("http://localhost:8083"))
                 .route("eureka-server", r -> r
@@ -35,4 +46,6 @@ public class GatewayConfig {
                         .uri("http://localhost:7777"))
                 .build();
     }
+
+
 }
