@@ -25,6 +25,14 @@ public class GatewayConfig {
                         r -> r.path("/api/orders/**", "/api/orders/**")
                                 .uri("lb://ORDER-SERVICE"))
                                 //.uri("http://localhost:8083"))
+                .route("eureka-server", r -> r
+                        .path("/eureka")
+                        // replace localhost:8080/eureka with localhost:7777/
+                        .filters(f -> f.rewritePath("/eureka", "/" ))
+                        .uri("http://localhost:7777"))
+                .route("eureka-static", r -> r
+                        .path("/eureka/**")
+                        .uri("http://localhost:7777"))
                 .build();
     }
 }
