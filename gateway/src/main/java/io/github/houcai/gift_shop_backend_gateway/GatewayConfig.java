@@ -18,7 +18,7 @@ public class GatewayConfig {
                                 .uri("lb://USER-SERVICE")) //only possible with eureka.
                                 //.uri("http://localhost:8081"))
                 .route("product-service",
-        r -> r.path("/api/products/**")
+                        r -> r.path("/api/products/**")
                                 .uri("lb://PRODUCT-SERVICE"))
                                 //.uri("http://localhost:8082"))
                 .route("order-service",
