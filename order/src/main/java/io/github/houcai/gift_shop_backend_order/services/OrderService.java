@@ -9,6 +9,7 @@ import io.github.houcai.gift_shop_backend_order.models.Order;
 import io.github.houcai.gift_shop_backend_order.models.OrderItem;
 import io.github.houcai.gift_shop_backend_order.models.OrderStatus;
 import io.github.houcai.gift_shop_backend_order.repositories.OrderRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class OrderService {
     private final UserServiceClient userServiceClient;
 
     @Transactional
+    @CircuitBreaker(name="orderServiceBreaker", fallbackMethod = "")
     public Optional<OrderResponse> createOrder(String userId){
         // Validate for cart items
         List<CartItem> cartItems = cartService.getCart(userId);

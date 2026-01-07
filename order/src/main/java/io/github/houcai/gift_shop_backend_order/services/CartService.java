@@ -7,6 +7,7 @@ import io.github.houcai.gift_shop_backend_order.dtos.ProductResponse;
 import io.github.houcai.gift_shop_backend_order.dtos.UserResponse;
 import io.github.houcai.gift_shop_backend_order.models.CartItem;
 import io.github.houcai.gift_shop_backend_order.repositories.CartItemRepository;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ public class CartService {
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
 
+    @CircuitBreaker(name="orderServiceBreaker", fallbackMethod = "")
     public String addToCart(String userId, CartItemRequest request){
         // Look for product
         Optional<ProductResponse> productOpt = productServiceClient.fetchProductById(request.getProductId());
