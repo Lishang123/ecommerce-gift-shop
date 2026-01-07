@@ -25,7 +25,7 @@ public class CartService {
     private final ProductServiceClient productServiceClient;
     private final UserServiceClient userServiceClient;
 
-    @Retry(name="orderServiceRetry")
+    //@Retry(name="orderServiceRetry")
     @CircuitBreaker(name="orderServiceBreaker", fallbackMethod = "")
     public String addToCart(String userId, CartItemRequest request){
         // Look for product
