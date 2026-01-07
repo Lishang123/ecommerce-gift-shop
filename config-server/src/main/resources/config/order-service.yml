@@ -52,3 +52,8 @@ resilience4j:
         # Failure percentage needed to OPEN the circuit
         failureRateThreshold: 50
         automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      orderServiceRetry:
+        maxAttempts: 5
+        waitDuration: 5s
