@@ -57,3 +57,12 @@ resilience4j:
       orderServiceRetry:
         maxAttempts: 5
         waitDuration: 5s
+
+#  ratelimiter:
+#    instances:
+#      rateBreaker:
+#        # Allow at most 2 calls every 4 seconds.
+#        limit-refresh-period: 4s
+#        limit-for-period: 2
+#        timeout-duration: 0 # How long a request is allowed to wait for a permission.
+
