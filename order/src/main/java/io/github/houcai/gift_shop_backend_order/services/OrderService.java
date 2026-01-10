@@ -1,6 +1,7 @@
 package io.github.houcai.gift_shop_backend_order.services;
 
 import io.github.houcai.gift_shop_backend_order.clients.UserServiceClient;
+import io.github.houcai.gift_shop_backend_order.dtos.OrderCreatedEvent;
 import io.github.houcai.gift_shop_backend_order.dtos.OrderResponse;
 import io.github.houcai.gift_shop_backend_order.dtos.UserResponse;
 import io.github.houcai.gift_shop_backend_order.mappers.ResponseMapper;
@@ -12,6 +13,8 @@ import io.github.houcai.gift_shop_backend_order.repositories.OrderRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,6 +28,12 @@ public class OrderService {
     private final CartService cartService;
     private final OrderRepository orderRepository;
     private final UserServiceClient userServiceClient;
+    private RabbitTemplate rabbitTemplate;
+
+//    @Value("${rabbitmq.exchange.name}")
+//    private String exchangeName;
+//    @Value("${rabbitmq.routing.key}")
+//    private String routingKey;
 
     @Transactional
     @CircuitBreaker(name="orderServiceBreaker", fallbackMethod = "")
@@ -43,7 +52,6 @@ public class OrderService {
         // User user = userOptional.get();
 
         //TODO: reduce the quantity of the product for each order item.
-
 
         // Calculate total price
         BigDecimal totalPrice = cartItems.stream()
@@ -72,6 +80,17 @@ public class OrderService {
 
         // Clear the cart
         cartService.clearCart(userId);
+
+        // PUblish the order created event.
+        OrderCreatedEvent event = new OrderCreatedEvent(
+                order.getId(),
+                order.getUserId(),
+                order.getStatus(),
+                order.getItems().stream().map(ResponseMapper::toOrderItemDTO).toList(),
+                order.getTotalAmount(),
+                order.getCreatedAt()
+        );
+        rabbitTemplate.convertAndSend(event);
 
         return Optional.of(ResponseMapper.toResponse(savedOrder));
     }
