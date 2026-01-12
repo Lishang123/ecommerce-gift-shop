@@ -11,6 +11,9 @@ import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
+/**
+ * The gateway configuration class.
+ */
 @Configuration
 public class GatewayConfig {
 

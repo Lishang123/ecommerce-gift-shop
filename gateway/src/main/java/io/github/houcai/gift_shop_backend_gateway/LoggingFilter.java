@@ -8,6 +8,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+/**
+ * The logging filter handling every http request to the gateway service.
+ */
 @Component
 public class LoggingFilter implements GlobalFilter {
 
