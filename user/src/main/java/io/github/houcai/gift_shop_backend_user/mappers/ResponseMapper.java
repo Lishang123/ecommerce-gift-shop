@@ -6,9 +6,6 @@ import io.github.houcai.gift_shop_backend_user.models.Address;
 import io.github.houcai.gift_shop_backend_user.models.User;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
-import java.util.stream.Collectors;
-
 @NoArgsConstructor
 public final class ResponseMapper {
 
@@ -28,6 +25,7 @@ public final class ResponseMapper {
     public static UserResponse toResponse(User user) {
         return new UserResponse(
                 user.getId(),
+                user.getKeycloakId(),
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),

@@ -16,10 +16,20 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final KeyCloakAdminService keyCloakAdminService;
 
     public UserResponse createUser(UserRequest userRequest){
+        String token = keyCloakAdminService.getAdminAccessToken();
+        String keycloakUserId = keyCloakAdminService.createUser(token, userRequest);
+
         User user = new User();
         user.updateFrom(userRequest);
+        user.setKeycloakId(keycloakUserId);
+
+        keyCloakAdminService.assignClientRoleToUser(
+                userRequest.getUsername(),
+                "USER", keycloakUserId);
+
         userRepository.save(user);
         return ResponseMapper.toResponse(user);
     }
