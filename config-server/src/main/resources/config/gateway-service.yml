@@ -6,6 +6,12 @@ logging:
     root: info
     org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
     org.springframework.cloud.gateway: TRACE
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      max-file-size:5MB
+      max-history:7
 
 management:
   endpoints:
