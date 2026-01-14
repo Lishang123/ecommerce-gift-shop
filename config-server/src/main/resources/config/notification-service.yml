@@ -1,0 +1,32 @@
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 8084
+
+rabbitmq:
+  exchange:
+    name: order.exchange
+  queue:
+    name: order.queue
+  routing:
+    key: order.tracking
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+#logging:
+#  file:
+#    name: logs/${spring.application.name}.log
+#  logback:
+#    rollingpolicy:
+#      max-history: 7
+#      max-file-size: 5MB
