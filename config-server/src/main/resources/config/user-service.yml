@@ -40,5 +40,6 @@ logging:
     name: logs/${spring.application.name}.log
   logback:
     rollingpolicy:
+      # file-name-pattern: logs/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
       max-file-size: 5MB
       max-history: 7 # keep last 7 days of history
