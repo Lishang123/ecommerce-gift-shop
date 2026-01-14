@@ -30,3 +30,15 @@ keycloak:
     client-id: admin-cli
     #client-uuid: the id in the uri when setting up the shop client (not the uuid of admin-cli) in keycloak.
     client-uid: baa891cf-55ed-485f-ac39-a34cabb1e909
+
+
+logging:
+#  level:
+#    root: INFO
+#    com.ecommerce.user: TRACE
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      max-file-size: 5MB
+      max-history: 7 # keep last 7 files

@@ -81,3 +81,11 @@ resilience4j:
 #        limit-for-period: 2
 #        timeout-duration: 0 # How long a request is allowed to wait for a permission.
 
+  logging:
+    file:
+      logs/${spring.application.name}.log
+    logback:
+      rollingpolicy:
+        max-file-size: 5MB
+        max-history: 7
+
