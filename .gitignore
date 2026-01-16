@@ -19,6 +19,9 @@ monolith/.mvn/wrapper/maven-wrapper.jar
 *.iml
 *.ipr
 
+/logs/
+/additional/evaluate-loki/.data
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
