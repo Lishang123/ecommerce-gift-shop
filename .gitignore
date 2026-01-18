@@ -21,6 +21,7 @@ monolith/.mvn/wrapper/maven-wrapper.jar
 
 /logs/
 /additional/evaluate-loki/.data
+/additional/evaluate-prometheus/.data
 
 ### NetBeans ###
 /nbproject/private/
