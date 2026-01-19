@@ -30,6 +30,10 @@ management:
       enabled: true
     resilience4j:
       enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+
 
 eureka:
   client:

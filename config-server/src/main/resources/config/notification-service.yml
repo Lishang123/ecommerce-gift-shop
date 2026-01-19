@@ -4,6 +4,13 @@ spring:
     port: 5672
     username: guest
     password: guest
+    template:
+      observation-enabled: true
+    listener:
+      simple:
+        observation-enabled: true
+      direct:
+        observation-enabled: true
 
 server:
   port: 8084
@@ -36,3 +43,8 @@ management:
     web:
       exposure:
         include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+  observations:
+    enabled: true

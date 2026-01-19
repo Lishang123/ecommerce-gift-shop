@@ -15,6 +15,14 @@ spring:
     port: 5672
     username: guest
     password: guest
+    template:
+      observation-enabled: true
+    listener:
+      simple:
+        observation-enabled: true
+      direct:
+        observation-enabled: true
+
 
 server:
   port: 8083
@@ -36,6 +44,12 @@ management:
   endpoint:
     health:
       show-details:always
+  tracing:
+    sampling:
+      probability: 1.0
+  observations:
+    enabled: true
+
 
 eureka:
   client:

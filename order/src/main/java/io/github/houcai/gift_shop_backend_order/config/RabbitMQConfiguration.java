@@ -78,6 +78,8 @@ public class RabbitMQConfiguration {
         template.setMessageConverter(messageConverter());
         template.setExchange(exchangeName);
         template.setRoutingKey(routingKey);
+        // Micrometer observation.
+        template.setObservationEnabled(true);
         return template;
     }
 }
