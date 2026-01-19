@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .pathMatchers("/eureka/**").permitAll()
                         .pathMatchers("/api/products/**").hasRole("PRODUCT")
                         .pathMatchers("/api/users/**").hasRole("USER")
+                        .pathMatchers("/api/cart/**").hasRole("USER")
                         .anyExchange().authenticated())
                 // this application is an OAuth2 Resource Server
                 // a custom converter extracts roles (the user’s authorities)
