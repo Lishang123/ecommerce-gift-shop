@@ -3,5 +3,6 @@ spring:
     name: product-service
   config:
     # http://localhost:8888/product-service/default
-    import: configserver:http://localhost:8888
+    # optional is important for being replaced by other files like docker compose.
+    import: optional:configserver:http://localhost:8888
 

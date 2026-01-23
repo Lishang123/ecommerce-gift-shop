@@ -1,0 +1,104 @@
+server:
+  port: 8000
+
+logging:
+  level:
+    root: info
+    org.springframework.cloud.gateway.route.RouteDefinitionLocator: INFO
+    org.springframework.cloud.gateway: TRACE
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      max-file-size:5MB
+      max-history:7
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  # Always show detailed health information in the /actuator/health endpoint.
+  endpoint:
+    health:
+      show-details: always #TODO: when_authorized
+  # Enable circuit breaker health indicators in Actuator.
+  # doesn't work...
+  # only visible under actuator/circuitbreakers.
+  health:
+    circuitbreakers:
+      enabled: true
+    resilience4j:
+      enabled: true
+  tracing:
+    enabled: false
+    sampling:
+      probability: 1.0
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+# Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # Registers this circuit breaker in Spring Boot Actuator health.
+        # stll doesn't work, only visible under actuator/circuitbreakers.
+        registerHealthIndicator: true
+    instances:
+      giftshopBreaker:
+        registerHealthIndicator: true
+        # Look at last 10 calls and calc the failure rate with them.
+        slidingWindowType: count_based # time_based
+        slidingWindowSize: 12
+        # Minimum calls required before evaluation starts
+        minimumNumberOfCalls: 6
+        # How many test calls are allowed when HALF-OPEN.
+        permittedNumberOfCallsInHalfOpenState: 3
+        # How long the circuit stays OPEN before trying recovery.
+        waitDurationInOpenState: 10s
+        # Failure percentage needed to OPEN the circuit
+        failureRateThreshold: 50
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+
+spring:
+  # can be omitted if redis runs on 6379 per default.
+  data:
+    redis:
+      host: redis
+      port: 6379
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/gift-shop-app
+
+
+# 2026.1.6
+# This routing config no longer works for new artifact: spring-cloud-starter-gateway-server-webflux
+# I have to use RouteLocator instead!!
+
+# The old artifact: spring-cloud-starter-gateway still works with the following config.
+#spring:
+#  cloud:
+#    gateway:
+#      routes:
+#        - id: user-service
+#          uri: http://localhost:8081
+#          predicates:
+#            - Path=/api/users/**
+#        - id: product-service
+#          uri: http://localhost:8082
+#          predicates:
+#            - Path=/api/products/**
+#        - id: order-service
+#          uri: http://localhost:8083
+#          predicates:
+#            - Path=/api/orders/**, /api/cart/**
+# ex: http://localhost:8080/api/users -> http://localhost:8082/api/users

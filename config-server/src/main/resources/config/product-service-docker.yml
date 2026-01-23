@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
+    url: jdbc:postgresql://postgres:5432/gift-shop-monolith
     username: postgres # TODO: change to .env !
     password: postgres
   jpa:
@@ -19,12 +19,13 @@ management:
     web:
       exposure:
         include: "*"
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
   tracing:
     sampling:
       probability: 1.0
-  zipkin:
-    tracing:
-      endpoint: http://localhost:9411/api/v2/spans
+
 
 app:
   message: "Hello Product!"
@@ -32,7 +33,7 @@ app:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:7777/eureka
+      defaultZone: http://eureka:7777/eureka
     register-with-eureka: true
     fetch-registry: true
 

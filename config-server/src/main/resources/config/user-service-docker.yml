@@ -1,6 +1,6 @@
 spring:
   datasource: # TODO: talk to another database
-    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
+    url: jdbc:postgresql://postgres:5432/gift-shop-monolith
     username: postgres # TODO: change to .env !
     password: postgres
   jpa:
@@ -16,7 +16,7 @@ server:
 eureka:
   client:
     serviceUrl:
-      defaultZone: http://localhost:7777/eureka
+      defaultZone: http://eureka:7777/eureka
     register-with-eureka: true
     fetch-registry: true
 
@@ -24,12 +24,14 @@ keycloak:
   admin:
     username: shop-admin
     password: admin
-    server-url: http://localhost:8443
+    # docker exec -it user-service sh -lc \
+    #'wget -qO- http://keycloak:8080/realms/gift-shop-app/.well-known/openid-configuration | head'
+    server-url: http://keycloak:8080
     realm: gift-shop-app
     # the default client when using keycloak api.
     client-id: admin-cli
     #client-uuid: the id in the uri when setting up the shop client (not the uuid of admin-cli) in keycloak.
-    client-uid: ec22f5f0-751f-4ed5-a549-a823be35964f
+    client-uid: 6fb64d02-a2c7-4feb-bda9-d6bfe2b00cf8
 
 
 logging:
