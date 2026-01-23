@@ -46,5 +46,10 @@ management:
   tracing:
     sampling:
       probability: 1.0
+    # Unlike localhost, for docker, we have to specify the endpoint for services to export
+    # the old config: management.zipkin.tracing.endpoint no longer works!!!!
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
   observations:
     enabled: true

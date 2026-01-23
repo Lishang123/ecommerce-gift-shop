@@ -132,6 +132,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:7777/eureka
       - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/realms/gift-shop-app
     depends_on:
       - rabbitmq

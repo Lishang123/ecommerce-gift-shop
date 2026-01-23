@@ -35,9 +35,11 @@ keycloak:
 
 
 logging:
-#  level:
-#    root: INFO
-#    com.ecommerce.user: TRACE
+  level:
+    # please enable the DEBUG log if zipking trace is not showing up.
+    # Because without it, it will only show the bug for the first time and turn completely silent.
+    zipkin2.reporter: DEBUG
+    org.springframework.boot.zipkin.autoconfigure: TRACE
   file:
     name: logs/${spring.application.name}.log
   logback:
@@ -55,3 +57,8 @@ management:
   tracing:
     sampling:
       probability: 1.0
+    # Unlike localhost, for docker, we have to specify the endpoint for services to export
+    # the old config: management.zipkin.tracing.endpoint no longer works!!!!
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
