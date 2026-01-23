@@ -1,5 +1,6 @@
 package io.github.houcai.gift_shop_backend_gateway;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
 import org.springframework.cloud.gateway.filter.ratelimit.RedisRateLimiter;
 import org.springframework.cloud.gateway.route.RouteLocator;
@@ -15,6 +16,7 @@ import java.time.Duration;
  * The gateway configuration class.
  */
 @Configuration
+@Slf4j
 public class GatewayConfig {
 
     @Bean
@@ -35,6 +37,7 @@ public class GatewayConfig {
 
     @Bean
     public RouteLocator routeLocator(RouteLocatorBuilder builder) {
+        log.info(">>> Creating Gateway routes (RouteLocator bean)");
         return builder.routes()
                 /*
                     Rate limit first, then circuit breaker, then retry:
