@@ -20,6 +20,7 @@ monolith/.mvn/wrapper/maven-wrapper.jar
 *.ipr
 
 /logs/
+/*/logs/
 /additional/evaluate-loki/.data
 /additional/evaluate-prometheus/.data
 /additional/keycloak-backups/
