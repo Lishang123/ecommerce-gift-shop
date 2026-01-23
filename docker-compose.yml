@@ -45,6 +45,8 @@ services:
       KC_HOSTNAME_STRICT_HTTPS: "false"
       KC_HOSTNAME: "keycloak"
       KC_HOSTNAME_PORT: "8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
     command: [ "start-dev" ]
     networks:
       - backend
@@ -229,3 +231,4 @@ volumes:
   postgres:
   pgadmin:
   redis-data:
+  keycloak_data:
