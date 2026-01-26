@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://postgres:5432/gift-shop-monolith
+    url: jdbc:postgresql://postgres:5432/gift_shop_product
     username: postgres # TODO: change to .env !
     password: postgres
   jpa:
