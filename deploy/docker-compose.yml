@@ -92,6 +92,7 @@ services:
       - 9411:9411
     networks:
       - backend
+      - loki # send traces to grafana
 
   config-server:
     build: ../config-server
