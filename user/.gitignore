@@ -1,6 +1,6 @@
 HELP.md
 target/
-monolith/.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
@@ -18,15 +18,6 @@ monolith/.mvn/wrapper/maven-wrapper.jar
 *.iws
 *.iml
 *.ipr
-
-/logs/
-/*/logs/
-/deploy/.data
-/additional/evaluate-loki/.data
-/additional/evaluate-prometheus/.data
-/additional/keycloak-backups/
-
-ds.yaml
 
 ### NetBeans ###
 /nbproject/private/

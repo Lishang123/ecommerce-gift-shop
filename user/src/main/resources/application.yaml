@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: user-service
+  config:
+    # use optional so that the startup won't fail just because the server is unreachable.
+    # don't use optional if config server is the only option.
+    # must use optional if the value can be replaced by docker environment variables.
+    import: optional:configserver:http://localhost:8888

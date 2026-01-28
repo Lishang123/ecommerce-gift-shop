@@ -1,0 +1,48 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://postgres:5432/gift_shop_product
+    username: postgres # TODO: change to .env !
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8082
+
+# this is for triggering refresh event after the config file is changed at runtime!
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+    # Unlike localhost, for docker, we have to specify the endpoint for services to export
+    # the old config: management.zipkin.tracing.endpoint no longer works!!!!
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
+
+
+app:
+  message: "Hello Product!"
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+logging:
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      max-file-size: 5MB
+      max-history: 7

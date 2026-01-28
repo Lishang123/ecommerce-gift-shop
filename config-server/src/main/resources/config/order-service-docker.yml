@@ -1,0 +1,109 @@
+spring:
+  datasource: # TODO: talk to another database
+    url: jdbc:postgresql://postgres:5432/gift_shop_order
+    username: postgres # TODO: change to .env !
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  # rabbitMQ for sending messages to the queue.
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+    template:
+      observation-enabled: true
+    listener:
+      simple:
+        observation-enabled: true
+      direct:
+        observation-enabled: true
+
+server:
+  port: 8083
+
+rabbitmq:
+  exchange:
+    name: order.exchange
+  queue:
+    name: order.queue
+  routing:
+    key: order.tracking
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details:always
+  tracing:
+    sampling:
+      probability: 1.0
+    # Unlike localhost, for docker, we have to specify the endpoint for services to export
+    # the old config: management.zipkin.tracing.endpoint no longer works!!!!
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans
+  observations:
+    enabled: true
+
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+# Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        # Registers this circuit breaker in Spring Boot Actuator health.
+        # only visible under actuator/circuitbreakers.
+        registerHealthIndicator: true
+    instances:
+      orderServiceBreaker:
+        registerHealthIndicator: true
+        slidingWindowType: count_based # time_based
+        # Look at last 12 calls and calc the failure rate with them.
+        slidingWindowSize: 12
+        # Minimum calls required before evaluation starts
+        minimumNumberOfCalls: 6
+        # How many test calls are allowed when HALF-OPEN.
+        permittedNumberOfCallsInHalfOpenState: 3
+        # How long the circuit stays OPEN before trying recovery.
+        waitDurationInOpenState: 10s
+        # Failure percentage needed to OPEN the circuit
+        failureRateThreshold: 50
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      orderServiceRetry:
+        maxAttempts: 5
+        waitDuration: 5s
+
+#  ratelimiter:
+#    instances:
+#      rateBreaker:
+#        # Allow at most 2 calls every 4 seconds.
+#        limit-refresh-period: 4s
+#        limit-for-period: 2
+#        timeout-duration: 0 # How long a request is allowed to wait for a permission.
+
+  logging:
+    file:
+      logs/${spring.application.name}.log
+    logback:
+      rollingpolicy:
+        max-file-size: 5MB
+        max-history: 7
+

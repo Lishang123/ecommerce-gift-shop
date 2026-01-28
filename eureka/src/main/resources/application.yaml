@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: eureka
+
+server:
+  port: 7777
+
+eureka:
+  client: # config for eureka server
+    register-with-eureka: false
+    fetch-registry: false
+    serviceUrl:
+      #have to add it otherwise it won't find the server
+      defaultZone: http://localhost:7777/eureka
+
+logging:
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      max-history: 7
+      max-file-size: 5MB

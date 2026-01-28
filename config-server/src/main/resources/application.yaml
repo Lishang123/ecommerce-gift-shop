@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud: # Configures the behavior of the config server.
+    config:
+      server:
+        native:
+          # not work with Spring Cloud Bus + RabbitMQ because of JAR
+          # search-locations: classpath:/config
+
+          # now the spring cloud bus version auto-refresh (using rabbitMQ)
+          search-locations: file:/Users/houcai/Projects/carmel-gift-shop/carmel-gift-shop/config-server/src/main/resources/config
+  rabbitmq: # for spring cloud bus
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+
+
+server:
+  port: 8888

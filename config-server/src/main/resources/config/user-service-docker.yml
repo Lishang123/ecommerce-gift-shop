@@ -1,0 +1,64 @@
+spring:
+  datasource: # TODO: talk to another database
+    url: jdbc:postgresql://postgres:5432/gift_shop_user
+    username: postgres # TODO: change to .env !
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+keycloak:
+  admin:
+    username: shop-admin
+    password: admin
+    # docker exec -it user-service sh -lc \
+    #'wget -qO- http://keycloak:8080/realms/gift-shop-app/.well-known/openid-configuration | head'
+    server-url: http://keycloak:8080
+    realm: gift-shop-app
+    # the default client when using keycloak api.
+    client-id: admin-cli
+    #client-uuid: the id in the uri when setting up the shop client (not the uuid of admin-cli) in keycloak.
+    client-uid: 6fb64d02-a2c7-4feb-bda9-d6bfe2b00cf8
+
+
+logging:
+  level:
+    # please enable the DEBUG log if zipking trace is not showing up.
+    # Because without it, it will only show the bug for the first time and turn completely silent.
+    zipkin2.reporter: DEBUG
+    org.springframework.boot.zipkin.autoconfigure: TRACE
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      # file-name-pattern: logs/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
+      max-file-size: 5MB
+      max-history: 7 # keep last 7 days of history
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+    # Unlike localhost, for docker, we have to specify the endpoint for services to export
+    # the old config: management.zipkin.tracing.endpoint no longer works!!!!
+    export:
+      zipkin:
+        endpoint: http://zipkin:9411/api/v2/spans

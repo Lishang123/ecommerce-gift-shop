@@ -1,0 +1,55 @@
+spring:
+  datasource: # TODO: talk to another database
+    url: jdbc:postgresql://localhost:5432/gift-shop-monolith
+    username: postgres # TODO: change to .env !
+    password: postgres
+  jpa:
+    database: POSTGRESQL
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+server:
+  port: 8081
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:7777/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+keycloak:
+  admin:
+    username: shop-admin
+    password: admin
+    server-url: http://localhost:8443
+    realm: gift-shop-app
+    # the default client when using keycloak api.
+    client-id: admin-cli
+    #client-uuid: the id in the uri when setting up the shop client (not the uuid of admin-cli) in keycloak.
+    client-uid: ec22f5f0-751f-4ed5-a549-a823be35964f
+
+
+logging:
+#  level:
+#    root: INFO
+#    com.ecommerce.user: TRACE
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      # file-name-pattern: logs/${spring.application.name}.%d{yyyy-MM-dd}.%i.log
+      max-file-size: 5MB
+      max-history: 7 # keep last 7 days of history
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0

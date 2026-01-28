@@ -1,0 +1,479 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres:18
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      # where the database should be stored.
+      # default: /var/lib/postgresql/data
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./init-multi-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    restart: unless-stopped
+
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - "5050:80"
+    networks:
+      - backend
+    restart: unless-stopped
+
+  keycloak:
+    container_name: keycloak
+    image: quay.io/keycloak/keycloak:26.4.7
+    ports:
+      # https://github.com/quarkusio/quarkus/discussions/48905#discussioncomment-14213858
+      # Add this ip to fix the issue of "HTTPS required"!
+      - "127.0.0.1:8080:8080"
+    environment:
+      # must create admin since it is not created automatically since keycloak 17
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_HOSTNAME: "keycloak"
+      KC_HOSTNAME_PORT: "8080"
+      KC_PROXY: "edge"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+    command: [ "start-dev" ]
+    networks:
+      - backend
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - backend
+
+  rabbitmq:
+    container_name: rabbitmq_container
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672"   # RabbitMQ Message Broker
+      - "15672:15672" # RabbitMQ Management UI (http://localhost:15672)
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmq-diagnostics -q ping || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks:
+      - backend
+    restart: unless-stopped
+
+
+  zipkin: # TODO: running but get errors in gateway
+    image: openzipkin/zipkin
+    container_name: zipkin_container
+    ports:
+      - 9411:9411
+    networks:
+      - backend
+      - loki # send traces to grafana
+
+  config-server:
+    build: ../config-server
+    container_name: config-server
+    depends_on:
+      - rabbitmq
+    ports:
+      - 8888:8888
+    networks:
+      - backend
+    environment:
+#      - SPRING_PROFILES_ACTIVE=docker  # Doesn't work somehow.
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_CLOUD_CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=/config
+    volumes:
+      - ../config-server/src/main/resources/config:/config
+
+  eureka:
+    build: ../eureka
+    container_name: eureka
+    ports:
+      - 7777:7777
+    networks:
+      - backend
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+    healthcheck:
+      # test: ["CMD-SHELL", "wget --spider http://localhost:7777/actuator/health || exit 1"]
+      test: ["CMD", "wget", "--spider", "http://localhost:7777/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5 # mark the container unhealthy after 5 consecutive failures.
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - backend
+
+  gateway-service:
+    build: ../gateway
+    container_name: gateway
+    ports:
+      - 8000:8000
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:7777/eureka
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI=http://keycloak:8080/realms/gift-shop-app
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      config-server:
+        condition: service_started
+      redis:
+        condition: service_started
+      zipkin:
+        condition: service_started
+      product-service:
+        condition: service_started
+      user-service:
+        condition: service_started
+      order-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+    networks:
+      - backend
+    restart: on-failure
+
+  product-service:
+    build: ../product
+    container_name: product
+    ports:
+      - 8082:8082
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - config-server
+      - eureka
+      - zipkin
+      - rabbitmq
+      - redis
+    networks:
+      - backend
+    restart: on-failure
+
+  user-service:
+    build: ../user
+    container_name: user
+    ports:
+      - 8081:8081
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_KEYCLOAK_ADMIN_CLIENT_UID=6fb64d02-a2c7-4feb-bda9-d6bfe2b00cf8
+    depends_on:
+      - config-server
+      - eureka
+      - zipkin
+      - rabbitmq
+      - redis
+    networks:
+      - backend
+    restart: on-failure
+
+  order-service:
+    build: ../order
+    container_name: order
+    ports:
+      - 8083:8083
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - config-server
+      - eureka
+      - zipkin
+      - rabbitmq
+      - redis
+    networks:
+      - backend
+    restart: on-failure
+
+  notification-service:
+    build: ../notification
+    container_name: notification
+    ports:
+      - 8084:8084
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_RABBITMQ_HOST=rabbitmq
+    depends_on:
+      - config-server
+      - eureka
+      - zipkin
+      - rabbitmq
+      - redis
+    networks:
+      - backend
+    restart: on-failure
+
+  read:
+    image: grafana/loki:latest
+    command: "-config.file=/etc/loki/config.yaml -target=read"
+    ports:
+      - 3101:3100
+      - 7946
+      - 9095
+    volumes:
+      - ./logging/loki-config.yaml:/etc/loki/config.yaml
+    depends_on:
+      - minio
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: &loki-dns
+      loki:
+        aliases:
+          - loki
+
+  write:
+    image: grafana/loki:latest
+    command: "-config.file=/etc/loki/config.yaml -target=write"
+    ports:
+      - 3102:3100
+      - 7946
+      - 9095
+    volumes:
+      - ./logging/loki-config.yaml:/etc/loki/config.yaml
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      - minio
+    networks:
+      <<: *loki-dns
+
+  alloy:
+    image: grafana/alloy:latest
+    volumes:
+      - ./logging/alloy-local-config.yaml:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ../../logs:/logs-parent:ro
+    command: run --server.http.listen-addr=0.0.0.0:12345 --storage.path=/var/lib/alloy/data /etc/alloy/config.alloy
+    ports:
+      - 12345:12345
+    depends_on:
+      - loki-gateway
+    networks:
+      - loki
+
+  minio:
+    image: minio/minio
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /data/loki-data && \
+        mkdir -p /data/loki-ruler && \
+        minio server /data
+    environment:
+      - MINIO_ROOT_USER=loki
+      - MINIO_ROOT_PASSWORD=supersecret
+      - MINIO_PROMETHEUS_AUTH_TYPE=public
+      - MINIO_UPDATE=off
+    ports:
+      - 9000
+    volumes:
+      - ./.data/minio:/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 15s
+      timeout: 20s
+      retries: 5
+    networks:
+      - loki
+
+  prometheus:
+    image: prom/prometheus:v2.44.0
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - loki
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    depends_on:
+      - loki-gateway
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki-gateway:3100
+            jsonData:
+              httpHeaderName1: "X-Scope-OrgID"
+            secureJsonData:
+              httpHeaderValue1: "tenant1"
+        EOF
+        /run.sh
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - loki
+
+  backend:
+    image: grafana/loki:latest
+    volumes:
+      - ./logging/loki-config.yaml:/etc/loki/config.yaml
+    ports:
+      - "3100"
+      - "7946"
+    command: "-config.file=/etc/loki/config.yaml -target=backend -legacy-read-mode=false"
+    depends_on:
+      - loki-gateway
+    networks:
+      - loki
+
+
+  loki-gateway:
+    image: nginx:latest
+    depends_on:
+      - read
+      - write
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        cat <<EOF > /etc/nginx/nginx.conf
+        user  nginx;
+        worker_processes  5;  ## Default: 1
+
+        events {
+          worker_connections   1000;
+        }
+
+        http {
+          resolver 127.0.0.11;
+
+          server {
+            listen             3100;
+
+            location = / {
+              return 200 'OK';
+              auth_basic off;
+            }
+
+            location = /api/prom/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+
+            location = /api/prom/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+
+            location ~ /api/prom/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+
+            location = /loki/api/v1/push {
+              proxy_pass       http://write:3100\$$request_uri;
+            }
+
+            location = /loki/api/v1/tail {
+              proxy_pass       http://read:3100\$$request_uri;
+              proxy_set_header Upgrade \$$http_upgrade;
+              proxy_set_header Connection "upgrade";
+            }
+
+            location ~ /loki/api/.* {
+              proxy_pass       http://read:3100\$$request_uri;
+            }
+          }
+        }
+        EOF
+        /docker-entrypoint.sh nginx -g "daemon off;"
+    ports:
+      - "3100:3100"
+    healthcheck:
+      test: [ "CMD", "service", "nginx", "status" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - loki
+
+  flog:
+    image: mingrammer/flog
+    command: -f json -d 200ms -l
+    networks:
+      - loki
+
+networks:
+  backend:
+    driver: bridge
+  loki:
+    driver: bridge
+
+volumes:
+  postgres:
+  pgadmin:
+  redis-data:
+  keycloak_data:
